@@ -2,52 +2,62 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
+import os
 
 # ── Load Saved Files ──────────────────────────────────────
-movies_list = pickle.load(open('movie_list.pkl', 'rb'))
-similarity  = pickle.load(open('similarity.pkl', 'rb'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+movies_list = pickle.load(open(os.path.join(BASE_DIR, 'movie_list.pkl'), 'rb'))
+similarity  = pickle.load(open(os.path.join(BASE_DIR, 'similarity.pkl'), 'rb'))
 
 # ── Fetch Movie Poster ────────────────────────────────────
 def fetch_poster(movie_id):
     try:
         url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=3b0c3004be07389bf1e92d4b247dd0af&language=en-US"
-        data = requests.get(url, timeout=5).json()
-        poster_path = data.get('poster_path')  # ← use .get() instead of direct key
+        response = requests.get(url, timeout=5)
+        data = response.json()
+        poster_path = data.get('poster_path')
         if poster_path:
             return "https://image.tmdb.org/t/p/w500/" + poster_path
         else:
-            return "https://via.placeholder.com/500x750?text=No+Poster"
+            return None  # ← return None if no poster
     except:
-        return "https://via.placeholder.com/500x750?text=No+Poster"
+        return None  # ← return None on any error
 
 # ── Recommend Function ────────────────────────────────────
 def recommend(movie):
     movie_index = movies_list[movies_list['title'] == movie].index[0]
     distances   = similarity[movie_index]
 
+    # Get top 30 candidates so we have plenty of backups
     movies_list_sorted = sorted(
         list(enumerate(distances)),
         reverse=True,
         key=lambda x: x[1]
-    )[1:20]
+    )[1:30]
 
     recommended_movies  = []
     recommended_posters = []
 
     for i in movies_list_sorted:
-        # Stop once we have 5 good recommendations
         if len(recommended_movies) == 5:
             break
 
         movie_id = movies_list.iloc[i[0]].movie_id
         poster   = fetch_poster(movie_id)
+        title    = movies_list.iloc[i[0]].title
 
-        # ← Only add if poster is a real TMDB image, skip placeholders
-        if "placeholder" not in poster:
-            recommended_movies.append(movies_list.iloc[i[0]].title)
+        if poster is not None:  # ← only add if poster exists
+            recommended_movies.append(title)
             recommended_posters.append(poster)
 
+    # ── Final safety net ──────────────────────────────────
+    # If still less than 5, fill with placeholder
+    while len(recommended_movies) < 5:
+        recommended_movies.append("N/A")
+        recommended_posters.append("https://via.placeholder.com/500x750?text=No+Poster")
+
     return recommended_movies, recommended_posters
+
 # ── Streamlit UI ──────────────────────────────────────────
 st.set_page_config(page_title="Smartflix", page_icon="🎬")
 
@@ -60,11 +70,11 @@ selected_movie_name = st.selectbox(
 )
 
 if st.button('🎯 Recommend'):
-    names, posters = recommend(selected_movie_name)
+    with st.spinner('Finding movies for you...'):
+        names, posters = recommend(selected_movie_name)
 
     st.markdown("### 🍿 Recommended Movies")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    cols = [col1, col2, col3, col4, col5]
+    cols = st.columns(5)
 
     for idx, col in enumerate(cols):
         with col:
