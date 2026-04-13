@@ -197,14 +197,14 @@ if recommend_btn:
     # Only show movies we actually have
     if not names:
     st.error("⚠️ No recommendations found. Check your API key.")
-else:
-    cols = st.columns(len(names))
-    for idx, col in enumerate(cols):
-        with col:
-            st.markdown('<div class="movie-card">', unsafe_allow_html=True)
-            st.image(posters[idx], use_column_width=True)
-            st.markdown(f'<div class="movie-title">{names[idx]}</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        cols = st.columns(len(names))
+        for idx, col in enumerate(cols):
+            with col:
+                st.markdown('<div class="movie-card">', unsafe_allow_html=True)
+                st.image(posters[idx], use_column_width=True)
+                st.markdown(f'<div class="movie-title">{names[idx]}</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
 
 # Footer
 st.markdown('<hr class="red-divider">', unsafe_allow_html=True)
