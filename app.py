@@ -11,10 +11,12 @@ similarity  = pickle.load(open('similarity.pkl', 'rb'))
 def fetch_poster(movie_id):
     try:
         url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=3b0c3004be07389bf1e92d4b247dd0af&language=en-US"
-        data = requests.get(url).json()
-        poster_path = data['poster_path']
-        full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
-        return full_path
+        data = requests.get(url, timeout=5).json()
+        poster_path = data.get('poster_path')  # ← use .get() instead of direct key
+        if poster_path:
+            return "https://image.tmdb.org/t/p/w500/" + poster_path
+        else:
+            return "https://via.placeholder.com/500x750?text=No+Poster"
     except:
         return "https://via.placeholder.com/500x750?text=No+Poster"
 
@@ -36,6 +38,12 @@ def recommend(movie):
         movie_id = movies_list.iloc[i[0]].movie_id
         recommended_movies.append(movies_list.iloc[i[0]].title)
         recommended_posters.append(fetch_poster(movie_id))
+
+    # ← Safety check: pad lists if something went wrong
+    while len(recommended_posters) < 5:
+        recommended_posters.append("https://via.placeholder.com/500x750?text=No+Poster")
+    while len(recommended_movies) < 5:
+        recommended_movies.append("Unknown")
 
     return recommended_movies, recommended_posters
 
