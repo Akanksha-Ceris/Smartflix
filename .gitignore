@@ -6,6 +6,8 @@ __pycache__/
 tmdb_5000_movies.csv
 tmdb_5000_credits.csv
 =======
+similarity.pkl
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -214,5 +216,3 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 >>>>>>> aff7d0fb16aae1b5878f06aca6f3115cfbde1334
-similarity.pkl
-movie_list.pkl
