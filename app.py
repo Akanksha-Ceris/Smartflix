@@ -29,24 +29,25 @@ def recommend(movie):
         list(enumerate(distances)),
         reverse=True,
         key=lambda x: x[1]
-    )[1:6]
+    )[1:20]
 
     recommended_movies  = []
     recommended_posters = []
 
     for i in movies_list_sorted:
-        movie_id = movies_list.iloc[i[0]].movie_id
-        recommended_movies.append(movies_list.iloc[i[0]].title)
-        recommended_posters.append(fetch_poster(movie_id))
+        # Stop once we have 5 good recommendations
+        if len(recommended_movies) == 5:
+            break
 
-    # ← Safety check: pad lists if something went wrong
-    while len(recommended_posters) < 5:
-        recommended_posters.append("https://via.placeholder.com/500x750?text=No+Poster")
-    while len(recommended_movies) < 5:
-        recommended_movies.append("Unknown")
+        movie_id = movies_list.iloc[i[0]].movie_id
+        poster   = fetch_poster(movie_id)
+
+        # ← Only add if poster is a real TMDB image, skip placeholders
+        if "placeholder" not in poster:
+            recommended_movies.append(movies_list.iloc[i[0]].title)
+            recommended_posters.append(poster)
 
     return recommended_movies, recommended_posters
-
 # ── Streamlit UI ──────────────────────────────────────────
 st.set_page_config(page_title="Smartflix", page_icon="🎬")
 
