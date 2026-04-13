@@ -195,6 +195,9 @@ if recommend_btn:
     st.markdown('<div class="section-heading">🍿 RECOMMENDED FOR YOU</div>', unsafe_allow_html=True)
 
     # Only show movies we actually have
+    if not names:
+    st.error("⚠️ No recommendations found. Check your API key.")
+else:
     cols = st.columns(len(names))
     for idx, col in enumerate(cols):
         with col:
