@@ -140,28 +140,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Fetch Movie Poster ────────────────────────────────────
-def fetch_poster(movie_id):
-    try:
-        url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=3b0c3004be07389bf1e92d4b247dd0af&language=en-US"
-        response = requests.get(url, timeout=5)
-        data = response.json()
-        poster_path = data.get('poster_path')
-        if poster_path:
-            return "https://image.tmdb.org/t/p/w500/" + poster_path
-        return None
-    except:
-        return None
 
-# ── Recommend Function ────────────────────────────────────
 def recommend(movie):
     movie_index = movies_list[movies_list['title'] == movie].index[0]
     distances   = similarity[movie_index]
 
+    # Get top 50 candidates for maximum backup
     movies_list_sorted = sorted(
         list(enumerate(distances)),
         reverse=True,
         key=lambda x: x[1]
-    )[1:30]
+    )[1:50]
 
     recommended_movies  = []
     recommended_posters = []
@@ -169,15 +158,19 @@ def recommend(movie):
     for i in movies_list_sorted:
         if len(recommended_movies) == 5:
             break
-        movie_id = movies_list.iloc[i[0]].movie_id
-        poster   = fetch_poster(movie_id)
-        title    = movies_list.iloc[i[0]].title
-        if poster is not None:
-            recommended_movies.append(title)
-            recommended_posters.append(poster)
+
+        try:
+            movie_id = movies_list.iloc[i[0]].movie_id
+            title    = movies_list.iloc[i[0]].title
+            poster   = fetch_poster(movie_id)
+
+            if poster is not None:
+                recommended_movies.append(title)
+                recommended_posters.append(poster)
+        except:
+            continue  # skip any broken entry
 
     return recommended_movies, recommended_posters
-
 # ── UI Layout ─────────────────────────────────────────────
 
 # Hero Section
@@ -201,7 +194,8 @@ if recommend_btn:
 
     st.markdown('<div class="section-heading">🍿 RECOMMENDED FOR YOU</div>', unsafe_allow_html=True)
 
-    cols = st.columns(5)
+    # Only show movies we actually have
+    cols = st.columns(len(names))
     for idx, col in enumerate(cols):
         with col:
             st.markdown('<div class="movie-card">', unsafe_allow_html=True)
