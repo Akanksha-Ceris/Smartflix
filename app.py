@@ -5,10 +5,9 @@ import requests
 import os
 
 # ── Load Saved Files ──────────────────────────────────────
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-movies_list = pickle.load(open(os.path.join(BASE_DIR, 'movie_list.pkl'), 'rb'))
-similarity  = pickle.load(open(os.path.join(BASE_DIR, 'similarity.pkl'), 'rb'))
 
+movies_list = pickle.load(open('movie_list.pkl', 'rb'))
+similarity  = pickle.load(open('similarity.pkl', 'rb'))
 # ── Netflix-style CSS ─────────────────────────────────────
 st.markdown("""
 <style>
