@@ -310,14 +310,18 @@ def recommend(movie):
             title    = movies_list.iloc[i[0]].title
             poster   = fetch_poster(movie_id)
             if poster:
+                try:
+                    score = min(int(60 + float(i[1]) * 39), 99)
+                except:
+                    score = 85
                 recommended_movies.append(title)
                 recommended_posters.append(poster)
-                score = int(60 + i[1] * 39)  # map similarity → 60-99%
-                recommended_scores.append(min(score, 99))
+                recommended_scores.append(score)
         except:
             continue
 
-    return recommended_movies, recommended_posters, recommended_scores
+    min_len = min(len(recommended_movies), len(recommended_posters), len(recommended_scores))
+    return recommended_movies[:min_len], recommended_posters[:min_len], recommended_scores[:min_len]
 
 
 # ══════════════════════════════════════════════════════════
