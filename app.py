@@ -277,7 +277,7 @@ div.stButton > button:hover {
 
 # ── Fetch Movie Poster ────────────────────────────────────
 def fetch_poster(movie_id):
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=3b0c3004be07389bf1e92d4b247dd0af&language=en-US"
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=2127f733cc92b1fd69741a3f7ed44bc4&language=en-US"
     try:
         data = requests.get(url, timeout=5).json()
         poster_path = data.get('poster_path')
